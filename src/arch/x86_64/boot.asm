@@ -1,7 +1,7 @@
-global start
+global start   ; Export `start` publicly. This is where the OS begins.
 
-section .text
-bits 32
+section .text  ; Program text of the OS.
+bits 32        ; The following instructions are 32-bit words.
 start:
     mov esp, stack_top
 
