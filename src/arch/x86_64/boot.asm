@@ -3,7 +3,8 @@ global start   ; Export `start` publicly. This is where the OS begins.
 section .text  ; Program text of the OS.
 bits 32        ; The following instructions are 32-bit words.
 start:
-    mov esp, stack_top
+    mov esp, stack_top ; Set stack pointer to be at the top of the stack; this
+                       ; lets us `call` and `ret`.
 
     call check_multiboot
     call check_cpuid
@@ -17,6 +18,8 @@ start:
     hlt
 
 check_multiboot:
+    ; Check the magic number the bootloader needs to set before loading the
+    ; kernel.
     cmp eax, 0x36d76289
     jne .no_multiboot
     ret
@@ -144,6 +147,10 @@ p3_table:
     resb 4096
 p2_table:
     resb 4096
+
+; Create stack of 64 bytes. Stack doesn't need to be initialized because we
+; only `pop` after we `push`. Stack grows downwards; `push eax` will subtract 4
+; from `eax` and `move [esp] eax` after.
 stack_bottom:
     resb 64
 stack_top:

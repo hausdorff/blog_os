@@ -1,3 +1,8 @@
+DOCKER ?= docker
+DIR := ${CURDIR}
+BUILDMNT = /os
+BUILD_IMAGE ?= hausdorff/os
+
 arch ?= x86_64
 kernel := build/kernel-$(arch).bin
 iso := build/os-$(arch).iso
@@ -8,14 +13,14 @@ assembly_source_files := $(wildcard src/arch/$(arch)/*.asm)
 assembly_object_files := $(patsubst src/arch/$(arch)/%.asm, \
 	build/arch/$(arch)/%.o, $(assembly_source_files))
 
-.PHONY: all clean run iso
+.PHONY: all clean run iso build
 
 all: $(kernel)
 
 clean:
 	@rm -r build
 
-run: $(iso)
+run: build
 	@qemu-system-x86_64 -cdrom $(iso)
 
 iso: $(iso)
@@ -34,3 +39,7 @@ $(kernel): $(assembly_object_files) $(linker_script)
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
 	@mkdir -p $(shell dirname $@)
 	@nasm -felf64 $< -o $@
+
+build:
+	$(DOCKER) build -t $(BUILD_IMAGE) .
+	$(DOCKER) run -it --rm -v $(DIR):$(BUILDMNT) -w $(BUILDMNT) $(BUILD_IMAGE)
