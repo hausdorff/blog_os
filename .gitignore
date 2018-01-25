@@ -1,1 +1,3 @@
 build
+.gdbinit
+qemu.log
